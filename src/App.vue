@@ -1,32 +1,49 @@
-<template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div>
+<template lang="pug">
+#app
+    component(:is="layout")
+    notifications
 </template>
 
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+<script>
+import AppDefault from '@/layouts/AppDefault'
+import AppSettings from '@/layouts/AppSettings'
+import mutations from '@/store/mutations'
+const {SET_LAYOUT} = mutations
+import {mapGetters} from 'vuex'
+
+export default {
+    components: {
+        'app-default': AppDefault,
+        'app-settings': AppSettings,
+    },
+    computed: {
+        ...mapGetters(['layout']),
+    },
+    watch: {
+        '$route.query': {
+            handler: 'onChangeLyaout',
+            deep: true,
+        },
+    },
+    methods: {
+        onChangeLyaout() {
+            this.$notify({
+                title: this.$route.meta.name,
+            })
+            if (this.$route.path.includes('/settings')) {
+                this.$store.commit(SET_LAYOUT, 'app-settings')
+            } else {
+                this.$store.commit(SET_LAYOUT, 'app-default')
+            }
+        },
+    },
 }
+</script>
 
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
-}
+<style lang="stylus">
+#app
+    font-family Avenir, Helvetica, Arial, sans-serif
+    color #2c3e50
+    -webkit-font-smoothing antialiased
+    -moz-osx-font-smoothing grayscale
 </style>
